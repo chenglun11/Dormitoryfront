@@ -40,11 +40,11 @@
                     <h1>管理后台登录</h1>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-icon layui-icon-username" for="username"></label>
-                    <input type="text" name="username" lay-verify="required|account" placeholder="用户名或者邮箱" autocomplete="off" class="layui-input" value="admin">
+                    <label class="layui-icon layui-icon-username" ></label>
+                    <input type="text" name="userName" lay-verify="required|account" placeholder="用户名或者邮箱" autocomplete="off" class="layui-input" value="admin">
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-icon layui-icon-password" for="password"></label>
+                    <label class="layui-icon layui-icon-password" ></label>
                     <input type="password" name="password" lay-verify="required|password" placeholder="密码" autocomplete="off" class="layui-input" value="123456">
                 </div>
 
@@ -70,7 +70,7 @@
 <script src="../js/lay-module/axios/axios.js"charset="utf-8"></script>
 
 <script>
-    layui.use(['form','jquery','axios'] ,function () {
+    layui.use(['form','jquery','axios','layer'] ,function () {
         var form = layui.form,
             axios = layui.axios,
             layer = layui.layer;
@@ -91,6 +91,7 @@
         form.on('submit(login)', function (data) {
 
             data = data.field;
+
             if (data.username == '') {
                 layer.msg('用户名不能为空');
                 return false;
@@ -99,28 +100,33 @@
                 layer.msg('密码不能为空');
                 return false;
             }
-            if (data.captcha == '') {
-                layer.msg('验证码不能为空');
-                return false;
-            }
             if(data.type == ''){
                 layer.msg('请选择登录组别');
                 return false;
             }
-            layer.msg('登录成功', function () {
-                // window.location = 'index.html';
-                console.log(data);
-                // 发起一个post请求
-                axios({
-                    method: 'post',
-                    url: 'http://localhost:8888/dormitory/login',
-                    data: data
-                }).then(data =>{
-                    console.log(data);
-                }).catch(error =>{
-                    console.log(error);
-                })
+
+
+            // 发起一个post请求
+            axios({
+                method: 'post',
+                url: '/login',
+                data: data
+            }).then(function(data){
+                if(data.code == 200){
+                    location.href = 'index.html';
+                }else{
+                    layer.msg(data.msg);
+                }
+            }).catch(function(error){
+                layer.msg(error);
+                console.log(error);
             });
+
+
+            // layer.msg('登录成功', function () {
+            //     //window.location = 'index.html';
+            //
+            // });
             return false;
         });
     });

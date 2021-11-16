@@ -2370,9 +2370,9 @@ layui.define(function(exports){
         axios.interceptors.response.use(function (response) {
             const res = response.data;
             if (response.status == 200) {
-                if (res.code == 0) {
+                if (res.code == 200) {
                     return res;
-                } else {         //后端返回数据为0时为正常数据
+                } else {         //后端返回数据为200时为正常数据
                     return Promise.reject(res.msg);
                 }
             } else {
@@ -2381,5 +2381,6 @@ layui.define(function(exports){
         }, function (error) {
             return Promise.reject(error);
         });
+        axios.defaults.baseURL= 'http://localhost:8888/dormitory';
         exports('axios', axios);
     });
