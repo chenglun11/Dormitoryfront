@@ -1,5 +1,5 @@
 
-layui.define(function(exports){
+layui.define(['store'],function(exports){
         (function webpackUniversalModuleDefinition(root, factory) {
             if (typeof exports === 'object' && typeof module === 'object')
                 module.exports = factory();
@@ -2362,14 +2362,22 @@ layui.define(function(exports){
 //# sourceMappingURL=axios.map
 
         axios.interceptors.request.use(function (config) {
+            if(store.getToken()){
+                config.headers.token=store.getToken();
+            }
             return config;
         }, function (error) {
             return Promise.reject(error);
         });
 
         axios.interceptors.response.use(function (response) {
-            const res = response.data;
+            console.log(response);
+
+            if(response.headers.token){
+                store.setToken(response.headers.token);
+            }
             if (response.status == 200) {
+                const res = response.data;
                 if (res.code == 200) {
                     return res;
                 } else {         //后端返回数据为200时为正常数据

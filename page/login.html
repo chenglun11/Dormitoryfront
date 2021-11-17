@@ -70,9 +70,10 @@
 <script src="../js/lay-module/axios/axios.js"charset="utf-8"></script>
 
 <script>
-    layui.use(['form','jquery','axios','layer'] ,function () {
+    layui.use(['form','jquery','axios','layer','store'] ,function () {
         var form = layui.form,
             axios = layui.axios,
+            store = layui.store,
             layer = layui.layer;
 
 
@@ -113,8 +114,10 @@
                 data: data
             }).then(function(data){
                 if(data.code == 200){
+                    store.setToken("token",data.data.token);
                     location.href = 'index.html';
                 }else{
+                    console.log(data);
                     layer.msg(data.msg);
                 }
             }).catch(function(error){
