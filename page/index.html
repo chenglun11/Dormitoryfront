@@ -118,14 +118,20 @@
 <script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
 <script src="../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
 <script>
-    layui.use(['jquery', 'layer', 'miniAdmin', 'miniTongji'], function () {
+    layui.use(['jquery', 'layer', 'miniAdmin', 'miniTongji','store'], function () {
         var $ = layui.jquery,
             layer = layui.layer,
+            store = layui.store,
             miniAdmin = layui.miniAdmin,
             miniTongji = layui.miniTongji;
 
+
+        if(!store.getToken()){
+            location.href = 'login.html';
+        }
+
         var options = {
-            iniUrl: "../api/init.json",    // 初始化接口
+            iniUrl: "menu/query",    // 初始化接口
             clearUrl: "../api/clear.json", // 缓存清理接口
             renderPageVersion: true,    // 初始化页面是否加版本号
             bgColorDefault: false,      // 主题默认配置

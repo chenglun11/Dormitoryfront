@@ -4,13 +4,15 @@
  * version:2.0
  * description:layuimini 主体框架扩展
  */
-layui.define(["jquery", "miniMenu", "element","miniPage", "miniTheme"], function (exports) {
+layui.define(["jquery", "miniMenu", "element","miniPage", "miniTheme",'axios','store'], function (exports) {
     var $ = layui.$,
         element = layui.element,
         layer = layui.layer,
         miniMenu = layui.miniMenu,
         miniTheme = layui.miniTheme,
-        miniPage = layui.miniPage;
+        miniPage = layui.miniPage,
+        axios = layui.axios,
+        store = layui.store;
 
     if (!/http(s*):\/\//.test(location.href)) {
         var tips = "请先将项目部署至web容器（Apache/Tomcat/Nginx/IIS/等），否则部分数据将无法显示";
@@ -41,7 +43,8 @@ layui.define(["jquery", "miniMenu", "element","miniPage", "miniTheme"], function
             options.menuChildOpen = options.menuChildOpen || false;
             options.loadingTime = options.loadingTime || 1;
             options.pageAnim = options.pageAnim || false;
-            $.getJSON(options.iniUrl, function (data) {
+
+            axios.get(options.iniUrl).then(function (data) {
                 if (data == null) {
                     miniAdmin.error('暂无菜单信息')
                 } else {
@@ -53,13 +56,13 @@ layui.define(["jquery", "miniMenu", "element","miniPage", "miniTheme"], function
                         multiModule: options.multiModule,
                     });
                     miniMenu.render({
-                        menuList: data,
+                        menuList: data.data,
                         multiModule: options.multiModule,
                         menuChildOpen: options.menuChildOpen
                     });
                     miniPage.render({
                         homeInfo:options.homeInfo,
-                        menuList: data,
+                        menuList: data.data,
                         multiModule: options.multiModule,
                         renderPageVersion: options.renderPageVersion,
                         menuChildOpen: options.menuChildOpen,
@@ -73,9 +76,45 @@ layui.define(["jquery", "miniMenu", "element","miniPage", "miniTheme"], function
                     });
                     miniAdmin.deleteLoader(options.loadingTime);
                 }
-            }).fail(function () {
+            }).catch(function () {
                 miniAdmin.error('菜单接口有误');
-            });
+            })
+
+            // $.getJSON(options.iniUrl, function (data) {
+            //     if (data == null) {
+            //         miniAdmin.error('暂无菜单信息')
+            //     } else {
+            //         miniAdmin.renderLogo(options.logoInfo);
+            //         miniAdmin.renderClear(options.clearUrl);
+            //         miniAdmin.renderAnim(options.pageAnim);
+            //         miniAdmin.listen({
+            //             homeInfo:options.homeInfo,
+            //             multiModule: options.multiModule,
+            //         });
+            //         miniMenu.render({
+            //             menuList: data,
+            //             multiModule: options.multiModule,
+            //             menuChildOpen: options.menuChildOpen
+            //         });
+            //         miniPage.render({
+            //             homeInfo:options.homeInfo,
+            //             menuList: data,
+            //             multiModule: options.multiModule,
+            //             renderPageVersion: options.renderPageVersion,
+            //             menuChildOpen: options.menuChildOpen,
+            //             listenSwichCallback: function () {
+            //                 miniAdmin.renderDevice();
+            //             }
+            //         });
+            //         miniTheme.render({
+            //             bgColorDefault: options.bgColorDefault,
+            //             listen: true,
+            //         });
+            //         miniAdmin.deleteLoader(options.loadingTime);
+            //     }
+            // }).fail(function () {
+            //     miniAdmin.error('菜单接口有误');
+            // });
         },
 
         /**
