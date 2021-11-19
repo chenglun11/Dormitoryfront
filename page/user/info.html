@@ -1,0 +1,53 @@
+<div class="layuimini-main">
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" readonly style="background-color: #F8F8F8" id="uname"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-block">
+                <input type="text" readonly  style="background-color: #F8F8F8" id="name"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">电话</label>
+            <div class="layui-input-block">
+                <input type="text" readonly  style="background-color: #F8F8F8" id="phone"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型</label>
+            <div class="layui-input-block">
+                <input type="text" readonly style="background-color: #F8F8F8" id="type" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea readonly style="background-color: #F8F8F8" id="remark"  class="layui-input"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','axios'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            axios = layui.axios,
+            $ = layui.$;
+            axios.get('user/info',{}).then(function (response) {
+                $('#uname').val(response.data.userName);
+                $('#name').val(response.data.name);
+                $('#phone').val(response.data.phone);
+                if(response.data.type == 0){
+                  $('#type').val("管理员");
+                }else{
+                  $('#type').val("宿管员");
+                }
+                $('#remark').val(response.data.remark);
+            })
+    });
+</script>

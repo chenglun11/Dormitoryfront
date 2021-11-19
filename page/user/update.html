@@ -1,0 +1,113 @@
+<div class="layuimini-main">
+    <div class="layui-form layuimini-form" lay-filter="updateForm">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">用户名</label>
+            <div class="layui-input-block">
+                <input type="hidden" name="id">
+                <input type="text" name="userName" lay-verify="required" lay-reqtext="用户名不能为空" placeholder="请输入用户名" value="" class="layui-input">
+                <tip>填写自己管理账号的名称。</tip>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" placeholder="请输入姓名" value="" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机</label>
+            <div class="layui-input-block">
+                <input type="number" name="phone" placeholder="请输入手机" value="" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户类型</label>
+            <div class="layui-input-block">
+                <select name="type" lay-verify="required">
+                    <option value="0">管理员</option>
+                    <option value="1">宿管员</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">功能权限</label>
+            <div class="layui-input-block">
+                <div class="ztree" id="ztree"></div>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注信息</label>
+            <div class="layui-input-block">
+                <textarea name="remark" class="layui-textarea" placeholder="请输入备注信息"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','axios','ztree'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            ztree = layui.ztree,
+            axios = layui.axios,
+            $ = layui.$;
+
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+
+        // 当前弹出层，防止ID被覆盖
+        let parentIndex = layer.index;
+
+        let setting = {
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            check:{
+                enable: true
+            }
+        };
+
+        axios.get('menu/tree?checked=1').then(function (response) {
+            ztree.init($("#ztree"), setting,response.data);
+        }).catch(function (error) {
+            console.log(error)
+        });
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            //获取树形的check过的id
+            let treeObj = ztree.getZTreeObj("ztree");
+            let nodes = treeObj.getCheckedNodes(true);
+            let idArray = nodes.map(function (item) {
+                return item.id;
+            })
+            let obj = data.field;
+            obj.ids = idArray;
+            axios.post('user/update',obj).then(function(response){
+                if(response.code == 200){
+                    layer.msg(response.msg);
+                    window.reload();
+                }
+                layer.close(parentIndex);
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+            return false;
+        });
+
+    });
+</script>
