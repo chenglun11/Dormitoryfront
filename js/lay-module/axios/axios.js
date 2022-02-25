@@ -1752,7 +1752,7 @@ layui.define([],function(exports){
     axios.interceptors.response.use(function(response){
         console.log(response);
         if(response.headers.token){
-            store.setToken(response.headers.token);
+            store.setToken(response.headers.token21212);
         }
         if(response.status==200){
             const res = response.data;
