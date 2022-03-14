@@ -1,0 +1,70 @@
+<div class="layuimini-main">
+    <div class="layui-form layuimini-form" lay-filter="setUpdateForm">
+        <div class="layui-form-item">
+            <label class="layui-form-label">前缀</label>
+            <div class="layui-input-block">
+                <input type="hidden" name="id" id="id">
+                <input type="hidden" name="buildingId" id="buildingId">
+                <input type="hidden" name="storeyId" id="storeyId">
+                <input type="text" name="prefix"  placeholder="请输入前缀" value="" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+                <label class="layui-form-label required">开始-结束值</label>
+                <div class="layui-input-inline" style="width: 100px;">
+                    <input type="number" name="start" autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-mid">-</div>
+                <div class="layui-input-inline" style="width: 100px;">
+                    <input type="number" name="end" autocomplete="off" class="layui-input">
+                </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">容量</label>
+            <div class="layui-input-block">
+                <input type="number" name="capacity" placeholder="请输入容量" class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','axios'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            axios = layui.axios,
+            $ = layui.$;
+
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+        // 当前弹出层，防止ID被覆盖
+        let parentIndex = layer.index;
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            axios.post('dormitorySet/update',data.field).then(function(response){
+                if(response.code == 200){
+                    layer.msg(response.msg);
+                    window.reload();
+                }
+                layer.close(parentIndex);
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+            return false;
+        });
+
+    });
+</script>

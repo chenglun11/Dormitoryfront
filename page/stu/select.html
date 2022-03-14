@@ -1,0 +1,182 @@
+<div class="layuimini-main">
+    <div class="layui-form layuimini-form">
+        <ul class="dormitory"></ul>
+    </div>
+</div>
+<style>
+.dormitory{
+    height: 800px;
+}
+.dormitory>li{
+    width: 100%;
+    clear: both;
+    margin-bottom: 5px;
+}
+.dormitory>li>p{
+    height: 40px;
+    background-color: #f8f8f8;
+    line-height: 40px;
+    font-size: 15px;
+    cursor: pointer;
+    padding-left: 10px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+}
+.dormitory>li>p>span{
+    float: right;
+    margin-right: 10px;
+}
+.dormitory>li>p>span>button{
+    cursor: pointer;
+    color: #00998b;
+    background: transparent;
+    border: 0px;
+    font-size: 20px;
+}
+.bed{
+    display: none;
+}
+.bed li{
+    float: left;
+    width: 130px;
+    height: 130px;
+    border:1px solid #f0f0f0;
+    margin: 10px;
+    text-align: center;
+    color: #999999;
+}
+.bed li:hover{
+    background-color: #f0f0f0;
+}
+.bed li i{
+    font-size: 20px;
+    cursor: pointer;
+}
+.bed li i:hover{
+    color: #00998b;
+    font-size: 20px;
+    cursor: pointer;
+}
+</style>
+<script>
+    layui.use(['form', 'table','axios'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            axios = layui.axios,
+            $ = layui.$;
+
+
+        function loadDormitory(){
+            axios.get('stu/select_dormitory',{}).then(function (response) {
+                $('.dormitory').empty();
+                if(response.data.length == 0){
+                  $('.dormitory').append("暂不能选择宿舍!请联系管理员");
+                  return;
+                }
+                response.data.forEach(item=>{
+                    let html =`<li>
+                                  <p key="${item.id}">${item.buildingName}-${item.no}
+                                      <span>
+                                      容量：${item.capacity}
+                                      入住数量：${item.selected}
+                                      </span>
+                                  </p>
+                                  <ul class="bed"><li></li><li></li><li></li></ul>
+                              </li>`;
+                    let htmlObj = $(html);
+                    htmlObj.find('p').click(function () {
+                        $(this).siblings().toggle(200);
+                        loadBed($(this).attr("key"),$(this).siblings(),item.studentList);
+                    });
+                    htmlObj.find('p').trigger('click');
+                    htmlObj.find('.dormitory-delete').click(function (event) {
+                        event.stopPropagation();
+                        layer.confirm("确定要删除吗？",function (index) {
+                            let ids = htmlObj.find('p').attr("key");
+                            axios.get('dormitory/delete?ids='+ids).then(function (response) {
+                                layer.msg(response.msg)
+                                htmlObj.remove();
+                                layer.close(index);
+                            }).catch();
+                        })
+                    });
+                    $('.dormitory').append(htmlObj);
+                });
+            })
+        }
+
+
+        loadDormitory();
+
+
+
+
+        function loadBed(dormitoryId,objbed,studentList){
+            axios.post('bed/query',{"dormitoryId":dormitoryId}).then(function (response) {
+                objbed.empty();
+                if(response.data.length==0){
+                    objbed.append('暂无床位信息');
+                }
+                let bedIdArray = studentList.map(v=>v.bedId);
+                console.log(bedIdArray);
+                response.data.forEach(item=>{
+                    let html;
+                    if(bedIdArray.some(v=>item.id == v)){
+                        html = `
+                        <li key="${item.id}">
+                        <img src="../images/bed2.png">
+                        <p>床位：${item.bno}</p>
+                        <p>已占用</p>
+                        <p>
+                            <input type="checkbox" checked disabled lay-skin="primary">
+                        </p>
+                        </li>
+                    `;
+                    }else{
+                        html = `
+                        <li key="${item.id}">
+                        <img src="../images/bed.png">
+                        <p>床位：${item.bno}</p>
+                        <p>&nbsp;</p>
+                        <p>
+                            <input type="checkbox" lay-filter="bedxx" bedId = "${item.id}" dormitoryId="${dormitoryId}"  lay-skin="primary">
+                        </p>
+                        </li>
+                    `;
+                    }
+
+
+                    htmlObj = $(html);
+                    form.render();
+                    htmlObj.find('.bed-delete').click(function (event) {
+                        event.stopPropagation();
+                        layer.confirm("确定要删除床位吗？",function (index) {
+                            axios.get('bed/delete?ids='+htmlObj.attr("key")).then(function (response) {
+                                htmlObj.remove();
+                                layer.msg(response.msg)
+                                layer.close(index);
+                            }).catch();
+                        })
+
+                    });
+                    objbed.append(htmlObj);
+                });
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+        }
+
+        form.on('checkbox(bedxx)', function(data){
+            let _dormitoryId = $(data.elem).attr("dormitoryId");
+            let _bedId = $(data.elem).attr("bedId");
+            axios.post('stu/select_dormitory_submit',{dormitoryId:_dormitoryId,bedId:_bedId}).then(function (response) {
+                layer.msg(response.msg)
+                loadDormitory();
+            }).catch(function (error) {
+                layer.msg(error)
+                loadDormitory();
+            })
+        })
+
+    });
+</script>

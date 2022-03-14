@@ -1,0 +1,83 @@
+<div class="layuimini-main">
+    <div class="layui-form layuimini-form" lay-filter="addDormitoryForm">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">宿舍号</label>
+            <div class="layui-input-block">
+                <input type="hidden" id="storeyId" name="storeyId">
+                <input type="hidden" id="buildingId" name="buildingId">
+                <input type="text" name="no" lay-verify="required" lay-reqtext="宿舍号不能为空" placeholder="请输入宿舍号" value="" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-block">
+                <select name="sex" lay-verify="required">
+                    <option value="1">男</option>
+                    <option value="0">女</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型</label>
+            <div class="layui-input-block">
+                <select name="type" lay-verify="required">
+                    <option value="2">2人间</option>
+                    <option value="3">3人间</option>
+                    <option value="4">4人间</option>
+                    <option value="5">5人间</option>
+                    <option value="6">6人间</option>
+                    <option value="7">7人间</option>
+                    <option value="8">8人间</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">容量</label>
+            <div class="layui-input-block">
+                <input type="text" name="capacity" placeholder="请输入容量" class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','axios'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            axios = layui.axios,
+            $ = layui.$;
+
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+
+        // 当前弹出层，防止ID被覆盖
+        let parentIndex = layer.index;
+
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            axios.post('dormitory/create',data.field).then(function(response){
+                if(response.code == 200){
+                    layer.msg(response.msg);
+                }
+                layer.close(parentIndex);
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+            return false;
+        });
+
+    });
+</script>

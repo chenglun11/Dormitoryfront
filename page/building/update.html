@@ -1,0 +1,129 @@
+<div class="layuimini-main">
+    <div class="layui-form layuimini-form" lay-filter="updateForm">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">名称</label>
+            <div class="layui-input-block">
+                <input type="hidden" name="id">
+                <input type="text" name="name" lay-verify="required" lay-reqtext="名称不能为空" placeholder="请输入名称" value="" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型</label>
+            <div class="layui-input-block">
+                <select name="type" lay-verify="required">
+                    <option value="2">2人间</option>
+                    <option value="3">3人间</option>
+                    <option value="4">4人间</option>
+                    <option value="5">5人间</option>
+                    <option value="6">6人间</option>
+                    <option value="7">7人间</option>
+                    <option value="8">8人间</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">总层数</label>
+            <div class="layui-input-block">
+                <input type="text" name="storeyNum" placeholder="请输入总层数" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-block">
+                <select name="sex" lay-verify="required">
+                    <option value="1">男</option>
+                    <option value="0">女</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">宿管员</label>
+            <div class="layui-input-block">
+                <input type="hidden" id="userId2">
+                <select name="userId" id="userId" lay-verify="required"></select>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注信息</label>
+            <div class="layui-input-block">
+                <textarea name="remark" class="layui-textarea" placeholder="请输入备注信息"></textarea>
+            </div>
+        </div>
+
+
+
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','axios','ztree'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            ztree = layui.ztree,
+            axios = layui.axios,
+            $ = layui.$;
+
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+
+        // 当前弹出层，防止ID被覆盖
+        let parentIndex = layer.index;
+
+
+        let setting = {
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            check:{
+                enable: true
+            }
+        };
+
+        axios.post('user/query',{type:1}).then(function (response) {
+            let options = '<option value="">请选择宿管员</option>';
+            for(let obj of response.data){
+                if(obj.id == $('#userId2').val()){
+                    options+='<option value="'+obj.id+'" selected>'+obj.name+'</option>'
+                }else{
+                    options+='<option value="'+obj.id+'">'+obj.name+'</option>'
+                }
+            }
+            $('#userId').append(options);
+            form.render('select');
+        }).catch(function (error) {
+            console.log(error)
+        });
+
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            axios.post('building/update',data.field).then(function(response){
+                if(response.code == 200){
+                    layer.msg(response.msg);
+                    window.reload();
+                }
+                layer.close(parentIndex);
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+            return false;
+        });
+
+    });
+</script>

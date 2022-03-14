@@ -1,0 +1,53 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','miniAdmin','form','element','axios'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            axios = layui.axios,
+            form = layui.form,
+            miniAdmin = layui.miniAdmin,
+            miniPage = layui.miniPage;
+
+        table.render({
+            elem: '#currentTableId',
+            method:'post',
+            url: 'stu/absence',
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print'],
+            cols: [[
+                {type: "checkbox", width: 50},
+                {field: 'id', width: 80, title: 'ID'},
+                {field: 'studentId',title: '姓名',templet:'<div>{{d.student.name}}</div>'},
+                {field: 'dormitoryId',title: '宿舍',templet:'<div>{{d.dormitory.no}}</div>'},
+                {field: 'startTime',title: '开始时间'},
+                {field: 'endTime',title: '结束时间'},
+                {field: 'remark',title: '备注'}
+            ]],
+            page: true,
+            skin: 'line'
+        });
+
+        window.reload = function(){
+            table.reload('currentTableId');
+        }
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            var result = JSON.stringify(data.field);
+            //执行搜索重载
+            table.reload('currentTableId', {
+                where: data.field
+            }, 'data');
+
+            return false;
+        });
+
+
+    });
+</script>

@@ -1,0 +1,251 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+        <div style="margin: 10px" id="building">
+        </div>
+    </div>
+    <div class="layuimini-main" style="width: 250px;position: absolute;left: 0px;">
+        <ul class="storey">
+        </ul>
+    </div>
+    <div class="layuimini-main" style="left: 270px;float: right;position: absolute;right:0px">
+        <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add">
+                    <i class="layui-icon layui-icon-add-circle"></i>
+                    新增
+                </button>
+                <button class="layui-btn layui-btn-sm layui-btn-normal data-delete-btn" lay-event="update">
+                    <i class="layui-icon layui-icon-edit"></i>
+                    修改
+                </button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete">
+                    <i class="layui-icon layui-icon-delete"></i>
+                    删除
+                </button>
+                <button class="layui-btn layui-btn-sm layui-btn-normal data-init-btn" lay-event="init">
+                    <i class="layui-icon layui-icon-edit"></i>
+                    宿舍初始化
+                </button>
+            </div>
+        </script>
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+    </div>
+</div>
+<style>
+.storey{
+    margin: 0px;
+    padding: 0px;
+}
+.storey li{
+    height: 40px;
+    line-height:40px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 16px;
+    cursor: pointer;
+    padding-left: 50px;
+}
+
+.storey>li>span{
+    float: right;
+    margin-right: 10px;
+}
+.storey>li>span>button{
+    cursor: pointer;
+    color: #00998b;
+    background: transparent;
+    border: 0px;
+    font-size: 20px;
+}
+
+.storey-bg{
+    background-color: #f0f0f0;
+    color: #000000;
+}
+</style>
+<script>
+    layui.use(['form', 'table','miniPage','element','axios'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            axios = layui.axios,
+            form = layui.form,
+            miniPage = layui.miniPage;
+
+        let _buildingId;
+        let _storeyId;
+        function loadBuilding(){
+            axios.post('building/query',{}).then(function (response) {
+                response.data.forEach(item=>{
+                    let btn = '<button class="layui-btn layui-btn-primary layui-btn-radius building-btn" key='+item.id+'>'+item.name+'</button>';
+                    let btnObj = $(btn);
+                    btnObj.click(function () {
+                        $(this).siblings().addClass('layui-btn-primary');
+                        $(this).removeClass('layui-btn-primary');
+                        loadStorey($(this).attr("key"));
+                    });
+                    $('#building').append(btnObj);
+                })
+                $('#building button:first').trigger('click');
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+        }
+        loadBuilding();
+
+        //加载楼层
+        function loadStorey(buildingId){
+            axios.post('storey/query',{"buildingId":buildingId}).then(function (response) {
+                $('.storey').empty();
+                response.data.forEach(item=>{
+                    let btn = `<li key="${item.id}">${item.name}</li>`;
+                    let btnObj = $(btn);
+                    btnObj.click(function () {
+                       $(this).siblings().removeClass('storey-bg');
+                       btnObj.addClass('storey-bg');
+                       loadDormitorySet(buildingId,$(this).attr("key"));
+
+                    });
+                    $('.storey').append(btnObj);
+                })
+                $('.storey li:first').trigger('click');
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+        }
+
+        function loadDormitorySet(buildingId,storeyId){
+            _buildingId = buildingId;
+            _storeyId = storeyId;
+            table.render({
+                elem: '#currentTableId',
+                method:'post',
+                url: 'dormitorySet/query',
+                data:{buildingId:buildingId,storeyId:storeyId},
+                toolbar: '#toolbarDemo',
+                defaultToolbar: ['filter', 'exports', 'print'],
+                cols: [[
+                    {type: "checkbox", width: 50},
+                    {field: 'id', width: 80, title: 'ID'},
+                    {field: 'prefix',title: '前缀'},
+                    {field: 'start',title: '前缀'},
+                    {field: 'end',title: '前缀'},
+                    {field: 'capacity', title: '容量'},
+                ]],
+                page: true,
+                skin: 'line'
+            });
+        }
+
+
+
+        window.reload = function(){
+            table.reload('currentTableId');
+        }
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            var result = JSON.stringify(data.field);
+            //执行搜索重载
+            table.reload('currentTableId', {
+                where: data.field
+            }, 'data');
+
+            return false;
+        });
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {   // 监听添加操作
+                let content = miniPage.getHrefContent('dormitorySet/add.html');
+                let openWH = miniPage.getOpenWidthHeight();
+                let index = layer.open({
+                    title: '添加',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: [openWH[0] + 'px', openWH[1] + 'px'],
+                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                    content: content
+                });
+                form.val('setAddForm',{
+                    buildingId:_buildingId,
+                    storeyId:_storeyId
+                })
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+            } else if (obj.event === 'update') {  //修改操作
+                let data = table.checkStatus('currentTableId').data;
+                if(data.length!=1){
+                    layer.msg("请选择一条记录修改");
+                }else{
+                    let content = miniPage.getHrefContent('dormitorySet/update.html');
+                    let openWH = miniPage.getOpenWidthHeight();
+                    let index = layer.open({
+                        title: '添加',
+                        type: 1,
+                        shade: 0.2,
+                        maxmin:true,
+                        shadeClose: true,
+                        area: [openWH[0] + 'px', openWH[1] + 'px'],
+                        offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                        content: content
+                    });
+                    form.val('setUpdateForm',{
+                        id:data[0].id,
+                        buildingId:data[0].buildingId,
+                        storeyId:data[0].storeyId,
+                        prefix:data[0].prefix,
+                        start:data[0].start,
+                        end:data[0].end,
+                        capacity:data[0].capacity,
+                    })
+
+                    $(window).on("resize", function () {
+                        layer.full(index);
+                    });
+                }
+            }else if (obj.event === 'delete') { //删除操作
+                let data = table.checkStatus('currentTableId').data;
+                if(data.length==0){
+                    layer.msg("请选择要删除的数据");
+                }else{
+                    layer.confirm('真的删除行吗', function (index) {
+                        //异步删除 map\filter\some\every
+                        let arr = data.map(item=>item.id);
+                        axios.get('dormitorySet/delete?ids='+arr.join(",")).then(function (response) {
+                            table.reload('currentTableId');
+                            layer.msg(response.msg);
+                        }).catch(function (error) {
+                            layer.msg(error);
+                        });
+                        layer.close(index);
+                    });
+                }
+            }else if(obj.event === 'init'){//初始化...
+                axios.post('dormitory/query',{buildingId:_buildingId,storeyId:_storeyId}).then(function (response) {
+                    let exist='';
+                    if(response.data.length>0){
+                        exist="已存在宿舍信息，初始化后原数据会丢失，";
+                    }
+                    layer.confirm(exist+'确认初始化吗？', function (index) {
+                        axios.post('dormitory/init',{buildingId:_buildingId,storeyId:_storeyId}).then(function (response) {
+                            layer.msg(response.msg);
+                        }).catch(function (error) {
+                            layer.msg(error);
+                        });
+                        layer.close(index);
+                    });
+                }).catch(function (error) {
+                    layer.msg(error);
+                });
+            }
+        });
+
+
+
+    });
+</script>

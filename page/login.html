@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <link rel="stylesheet" href="../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../lib/layui-v2.5.5/css/background.css" media="all">
     <!--[if lt IE 9]>
     <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
     <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
@@ -34,7 +35,7 @@
         .login-main .login-bottom {width:428px;background:#fff;border-radius:0 0 12px 12px;padding-bottom:53px;}
         .login-main .login-bottom .center {width:288px;margin:0 auto;padding-top:40px;padding-bottom:15px;position:relative;}
         .login-main .login-bottom .tip {clear:both;height:16px;line-height:16px;width:288px;margin:0 auto;}
-        body {background-image: url("https://bingapi.lchnan.cn"); / cover no-repeat;position:static;font-size:12px;}
+        body { cover no-repeat;position:static;font-size:12px;}
         input::-webkit-input-placeholder {color:#a6aebf;}
         input::-moz-placeholder {/* Mozilla Firefox 19+ */            color:#a6aebf;}
         input:-moz-placeholder {/* Mozilla Firefox 4 to 18 */            color:#a6aebf;}
@@ -54,12 +55,13 @@
             .login-main .login-bottom {width:360px !important;}
         }
     </style>
+
 </head>
 <body>
 <div class="main-body">
     <div class="login-main">
         <div class="login-top">
-            <span>刘国钧宿舍管理系统</span>
+            <span>宿舍管理系统</span>
             <span class="bg1"></span>
             <span class="bg2"></span>
         </div>
@@ -67,24 +69,24 @@
             <div class="center">
                 <div class="item">
                     <span class="icon icon-2"></span>
-                    <input type="text" name="userName" lay-verify="required" value="admin" autocomplete="off"  placeholder="请输入登录账号" maxlength="24"/>
+                    <input type="text" name="userName" lay-verify="required"  autocomplete="off"  placeholder="请输入登录账号" maxlength="24"/>
                 </div>
                 <div class="item">
                     <span class="icon icon-3"></span>
-                    <input type="password" name="password" lay-verify="required" value="123456"  autocomplete="off"  placeholder="请输入密码" maxlength="20">
+                    <input type="password" name="password" lay-verify="required"   autocomplete="off"  placeholder="请输入密码" maxlength="20">
                     <span class="bind-password icon icon-4"></span>
                 </div>
 
                 <div class="item">
-                    <span class="icon icon-2" style="float: left"></span>
-                    <div>
-                        <select name="type" lay-verify="required">
-                            <option value="">请选择登陆角色</option>
-                            <option value="0" selected>管理员</option>
-                            <option value="1">宿管员</option>
-                            <option value="2">学生</option>
-                        </select>
-                    </div>
+                  <span class="icon icon-2" style="float: left"></span>
+                  <div>
+                    <select name="type" lay-verify="required">
+                      <option value="">请选择登陆角色</option>
+                      <option value="0" selected>管理员</option>
+                      <option value="1">宿管员</option>
+                      <option value="2">学生</option>
+                    </select>
+                  </div>
                 </div>
             </div>
             <div class="layui-form-item" style="text-align:center; width:100%;height:100%;margin:0px;">
@@ -94,7 +96,8 @@
     </div>
 </div>
 <div class="footer">
-    ©版权所有 2020 LcHnAn
+    ©COPYRIGHT 2021 LGJ-LCHNAN
+    <br><a href="https://beian.miit.gov.cn/" target="_blank"> 苏ICP备2020053015号-2</a>
 </div>
 <script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
 <script src="../js/lay-config.js" charset="utf-8"></script>
@@ -130,12 +133,18 @@
             }).then(function(data){
                 if(data.code == 200){
                     store.setToken(data.data.token)
-                    location.href='index.html';
+                    if(data.data.user){
+                        store.setLoginInfo(data.data.user,0);
+                    }
+                    if(data.data.student){
+                        store.setLoginInfo(data.data.student,1);
+                    }
+
+                    location.href='index.html'
                 }else{
                     layer.msg(data.msg);
                 }
             }).catch(function(error){
-                console.log(error);
                 layer.msg(error);
             });
             return false;

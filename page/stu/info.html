@@ -1,0 +1,65 @@
+<div class="layuimini-main">
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">年级</label>
+            <div class="layui-input-block">
+                <input type="text" readonly id="gradeId"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">班级</label>
+            <div class="layui-input-block">
+                <input type="text" readonly id="clazzId"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">学号</label>
+            <div class="layui-input-block">
+                <input type="text" readonly id="stuNo"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-block">
+                <input type="text" readonly id="name" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">身份证号</label>
+            <div class="layui-input-block">
+                <input type="text" readonly id="idcard"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-block">
+                <input type="text" readonly id="sex"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机号码</label>
+            <div class="layui-input-block">
+                <input type="text" readonly id="phone"  class="layui-input">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','axios'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            axios = layui.axios,
+            $ = layui.$;
+        axios.get('stu/info',{}).then(function (response) {
+            $('#stuNo').val(response.data.stuNo);
+            $('#name').val(response.data.name);
+            $('#idcard').val(response.data.idcard);
+            $('#gradeId').val(response.data.grade.name);
+            $('#clazzId').val(response.data.org.name);
+            $('#sex').val(response.data.sex==0?"女":"男");
+            $('#phone').val(response.data.phone);
+        })
+
+
+    });
+</script>

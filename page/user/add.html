@@ -41,6 +41,9 @@
 
         <div class="layui-form-item">
             <label class="layui-form-label">功能权限</label>
+            <div class="layui-input-block">
+                <div class="ztree" id="ztree"></div>
+            </div>
         </div>
 
 
@@ -59,14 +62,13 @@
     </div>
 </div>
 <script>
-    layui.use(['form', 'table','axios',], function () {
+    layui.use(['form', 'table','axios','ztree'], function () {
         let form = layui.form,
             layer = layui.layer,
-            table = layui.table,
+            ztree = layui.ztree,
             axios = layui.axios,
             $ = layui.$;
 
-        /**
         /**
          * 初始化表单，要加上，不然刷新部分组件可能会不加载
          */
@@ -77,29 +79,49 @@
         let parentIndex = layer.index;
 
 
-        // let setting = {
-        //     data: {
-        //         simpleData: {
-        //             enable: true
-        //         }
-        //     },
-        //     check:{
-        //         enable: true
-        //     }
-        // };
+        let setting = {
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            check:{
+                enable: true
+            }
+        };
 
-        //监听提交
-
-        form.on('submit(saveBtn)', function (data) {
-            console.log(data.field);
-            axios.post('user/create',data.field).then(function (response) {
-                miniAdmin.success(response.msg());
-            layer.close(parentIndex);
-            //ztree.init($("#ztree"), setting,response.data);
+        axios.get('menu/tree').then(function (response) {
+            ztree.init($("#ztree"), setting,response.data);
         }).catch(function (error) {
             console.log(error)
         });
 
+
+
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+
+            //获取树形的check过的id
+            let treeObj = ztree.getZTreeObj("ztree");
+            let nodes = treeObj.getCheckedNodes(true);
+            let idArray = nodes.map(function (item) {
+                return item.id;
+            })
+            let obj = data.field;
+            obj.ids = idArray;
+            axios.post('user/create',obj).then(function(response){
+                if(response.code == 200){
+                    layer.msg(response.msg);
+                    //layui.table.reload('currentTableId');
+                    window.reload();
+                }
+                layer.close(parentIndex);
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+            return false;
         });
+
     });
 </script>

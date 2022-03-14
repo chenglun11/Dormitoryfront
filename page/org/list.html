@@ -1,0 +1,124 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add">
+                <i class="layui-icon layui-icon-add-circle"></i>
+                新增
+            </button>
+            <button class="layui-btn layui-btn-sm layui-btn-normal data-update-btn" lay-event="update">
+                <i class="layui-icon layui-icon-edit"></i>
+                修改
+            </button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete">
+                <i class="layui-icon layui-icon-delete"></i>
+                删除
+            </button>
+        </div>
+        <div class="ztree" id="ztree"></div>
+
+        <!--<input type="text" class="layui-input" id="demo">-->
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form','miniPage','element','axios','ztree','selectOrg'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            axios = layui.axios,
+            ztree = layui.ztree,
+            selectOrg = layui.selectOrg,
+            miniPage = layui.miniPage;
+
+        let setting = {
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            }
+        };
+
+        function loadTree(){
+            axios.get('org/tree').then(function (response) {
+                ztree.init($("#ztree"), setting,response.data);
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
+
+        loadTree();
+        window.reload = function(){
+            loadTree();
+        }
+
+        $('.data-add-btn').click(function () {
+            let content = miniPage.getHrefContent('org/add.html');
+            let openWH = miniPage.getOpenWidthHeight();
+            let index = layer.open({
+                title: '添加',
+                type: 1,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: [openWH[0] + 'px', openWH[1] + 'px'],
+                offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                content: content
+            });
+            $(window).on("resize", function () {
+                layer.full(index);
+            });
+        });
+        $('.data-update-btn').click(function () {
+            let content = miniPage.getHrefContent('org/update.html');
+            let openWH = miniPage.getOpenWidthHeight();
+            let index = layer.open({
+                title: '修改',
+                type: 1,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: [openWH[0] + 'px', openWH[1] + 'px'],
+                offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                content: content
+            });
+
+            let treeObj = ztree.getZTreeObj("ztree");
+            let node = treeObj.getSelectedNodes()[0];
+
+
+            form.val('updateForm',{
+                id:node.id,
+                name:node.name,
+                parentId:node.pId,
+            })
+            $('#parentName').val(node.getParentNode().name)
+
+
+            $(window).on("resize", function () {
+                layer.full(index);
+            });
+        });
+
+
+        $('.data-delete-btn').click(function () {
+            let treeObj = ztree.getZTreeObj("ztree");
+            let node = treeObj.getSelectedNodes()[0];
+            if(node){
+                layer.confirm('真的删除行吗', function (index) {
+                    axios.get('org/delete?id='+node.id).then(function (response) {
+                        loadTree();
+                        layer.msg(response.msg);
+                    }).catch(function (error) {
+                        layer.msg(error);
+                    });
+                    layer.close(index);
+                });
+            }else{
+                layer.msg("请选择要删除的数据");
+            }
+        });
+
+
+
+    });
+</script>

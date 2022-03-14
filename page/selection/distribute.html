@@ -1,0 +1,172 @@
+<div class="layuimini-main">
+    <div class="layuimini-main" style="width: 250px;position: absolute;left: 0px;">
+        <ul class="clazz"></ul>
+    </div>
+    <div class="layuimini-main" style="left: 270px;float: right;position: absolute;right:0px">
+        <div style="margin: 10px" id="building">
+        </div>
+        <ul class="dormitory">
+        </ul>
+
+        <div style="clear: both">
+            <button class="layui-btn layui-btn-normal" id="saveBtn">确认保存</button>
+        </div>
+    </div>
+
+</div>
+<style>
+.clazz{
+    margin: 0px;
+    padding: 0px;
+}
+.clazz li{
+    height: 40px;
+    line-height:40px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 16px;
+    cursor: pointer;
+    padding-left: 50px;
+}
+
+.clazz>li>span{
+    float: right;
+    margin-right: 10px;
+}
+.clazz>li>span>button{
+    cursor: pointer;
+    color: #00998b;
+    background: transparent;
+    border: 0px;
+    font-size: 20px;
+}
+
+.clazz-bg{
+    background-color: #f0f0f0;
+    color: #000000;
+}
+.dormitory{
+    margin: 0px;
+    padding: 0px;
+}
+.dormitory li{
+    height: 30px;
+    line-height:30px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 16px;
+    cursor: pointer;
+    padding-left: 50px;
+    float: left;
+    width: 100px;
+}
+</style>
+<script>
+    layui.use(['form', 'table','axios','laydate','selectOrg'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            axios = layui.axios,
+            laydate = layui.laydate,
+            selectOrg = layui.selectOrg,
+            $ = layui.$;
+
+        let _buildingId;
+        let _clazzId;
+        let clazzData = window.clazzData();
+        clazzData.clazzes.forEach(item=>{
+            let html = `<li key="${item.id}">${item.name}</li>`;
+            let htmlObj = $(html);
+            htmlObj.click(function () {
+                $(this).siblings().removeClass('clazz-bg');
+                $(this).addClass('clazz-bg');
+                _clazzId = $(this).attr("key");
+                loadDormitory(_buildingId);
+            });
+            $('.clazz').append(htmlObj);
+            $('.clazz li:first').trigger('click');
+        })
+
+
+        function loadBuilding(){
+            axios.post('building/query',{}).then(function (response) {
+                response.data.forEach(item=>{
+                    let btn = '<button class="layui-btn layui-btn-primary layui-btn-radius building-btn" key='+item.id+'>'+item.name+'</button>';
+                    let btnObj = $(btn);
+                    btnObj.click(function () {
+                        $(this).siblings().addClass('layui-btn-primary');
+                        $(this).removeClass('layui-btn-primary');
+                        loadDormitory($(this).attr("key"));
+                    });
+                    $('#building').append(btnObj);
+                })
+                $('#building button:first').trigger('click');
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+        }
+        loadBuilding();
+
+        function dormitory(){
+            return axios.post('dormitory/query',{buildingId:_buildingId,limit:10000});
+        }
+        function selection(){
+            return axios.post('selectionDormitory/query',{clazzId:_clazzId,limit:10000});
+        }
+
+        function loadDormitory(buildingId){
+            _buildingId = buildingId;
+            axios.all([dormitory(), selection()]).then(axios.spread(function(response, response2) {
+                let seletionArr = response2.data.map(item=>item.dormitoryId);
+                $('.dormitory').empty();
+                response.data.forEach(item=>{
+                    let flag = seletionArr.some(v=>v==item.id);
+                    let obj;
+                    if(flag){
+                        obj = `<li><input type="checkbox" checked name="dormitoryId" value="${item.id}">${item.no}</li>`
+                    }else{
+                        obj = `<li><input type="checkbox" name="dormitoryId" value="${item.id}">${item.no}</li>`
+                    }
+                    $('.dormitory').append(obj);
+                })
+            })).catch(function (error) {
+                console.log(error);
+            })
+
+            /*axios.post('dormitory/query',{buildingId:buildingId,limit:10000}).then(function (response) {
+            }).catch(function (error) {
+                layer.msg(error);
+            });*/
+        }
+
+
+
+        // 当前弹出层，防止ID被覆盖
+        let parentIndex = layer.index;
+
+
+        $('#saveBtn').click(function () {
+            if(!_clazzId){
+                layer.msg("请选择班级");
+                return;
+            }
+            let arr = $('.dormitory input[type="checkbox"]:checked');
+            let str = '';
+            for(let i=0;i<arr.length;i++){
+                str+=arr[i].value+",";
+            }
+            console.log(str)
+            let param = {"clazzId":_clazzId,"dormitoryIds":str}
+            console.log(param)
+            axios.post('selectionDormitory/create',param).then(function(response){
+                if(response.code == 200){
+                    layer.msg(response.msg);
+                    window.reload();
+                }
+                //layer.close(parentIndex);
+            }).catch(function (error) {
+                layer.msg(error);
+            });
+        });
+
+
+
+    });
+</script>
