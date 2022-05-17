@@ -19,7 +19,7 @@ layui.define([], function (exports) {
             return localStorage.getItem("userName");
         },
         getLoginType:function () {
-            return localStorage.getItem("type");
+          return localStorage.getItem("type");
         }
     });
 });
