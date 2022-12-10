@@ -11,7 +11,7 @@
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
+                        <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
                     </div>
                 </div>
             </form>
@@ -60,7 +60,7 @@
                 {field: 'id', width: 80, title: 'ID'},
                 {field: 'title',title: '标题'},
                 {field: 'userId',title: '发布者',templet:'<div>{{d.user.name}}</div>'},
-                {field: 'createTime',title: '发布时间'},
+                {field: 'createTime',title: '发布时间',templet:"<div>{{layui.util.toDateString(d.createTme, 'yyyy-MM-dd')}}</div>"},
             ]],
             page: true,
             skin: 'line'

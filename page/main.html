@@ -68,12 +68,15 @@
                             <tr>
                                 <td>项目名称</td>
                                 <td>
-                                    刘国钧在线宿舍管理系统
+                                    常州刘国钧高等职业技术学校-宿舍管理系统
                                 </td>
                             </tr>
                             <tr>
                                 <td>当前版本</td>
-                                <td>v2.0.1</td>
+                                <td>v2.3.3</td>
+                            </tr>
+                            <tr>
+                                <tb></tb>
                             </tr>
                             </tbody>
                         </table>
@@ -116,7 +119,7 @@
             response.data.forEach(item=>{
               let html = `<div class="layuimini-notice">
                             <div class="layuimini-notice-title">${item.title}</div>
-                            <div class="layuimini-notice-extra">${item.createTime}</div>
+<!--                            <div class="layuimini-notice-extra">${item.createTime}</div>-->
                             <div class="layuimini-notice-content layui-hide">${item.content}</div>
                          </div>`
               $('#notice-data').append(html);

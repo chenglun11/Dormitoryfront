@@ -1749,7 +1749,7 @@ axios.interceptors.request.use(function(config){
 
 
 axios.interceptors.response.use(function(response){
-
+    console.log(response);
     if(response.headers.token){
         store.setToken(response.headers.token);
     }
@@ -1757,8 +1757,6 @@ axios.interceptors.response.use(function(response){
         const res = response.data;
         if(res.code==200){ //后端返回的数据为200的时候为正常数据
             return res;
-            console.log(data);
-
         }else if(res.code==400){//token过时
           window.location.href = 'login.html';
           return ;
@@ -1771,7 +1769,6 @@ axios.interceptors.response.use(function(response){
 },function(error){
     return Promise.reject(error);
 });
-
 axios.defaults.baseURL="http://localhost:8888/dormitory"
 //输出axios
 exports('axios', axios);
